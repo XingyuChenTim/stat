@@ -1,0 +1,211 @@
+---
+title: "STAT2_HW2"
+author: |
+  | Xingyu Chen
+date: "`r format(Sys.time(), '%B %d, %Y')`"  
+output:
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc_depth: 2
+    df_print: kable
+    highlight: tango
+fontsize: 12pt
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align='center', message=FALSE, cache=TRUE)
+output <- opts_knit$get("rmarkdown.pandoc.to")
+if(!is.null(output)) {
+  if(output=="html") opts_chunk$set(out.width = '400px') else
+    opts_chunk$set(out.width='.6\\linewidth')
+}
+```
+
+\hfill\textcolor{red}{Total Score: 12/14} 
+
+# Homework #3  
+
+See Canvas for HW #3 assignment due date.  
+
+### Problem B.1: Model Selection Criterion  
+
+In this lesson, we will perform both the full and partial $F$-tests in $R$.  
+
+We will use the Amazon book data.   
+
+https://raw.githubusercontent.com/bzaharatos/-Statistical-Modeling-for-Data-Science-Applications/master/Modern Regression Analysis / Datasets/amazon.txt   
+
+The data consists of data on $n=325$ books and includes measurements of:  
+- aprice : The price listed on Amazon (dollars)
+- Lprice : The book's list price (dollars)
+- weight: The book's weight (ounces)
+- pages : The number of pages in the book
+- height : The book's height (inches)
+- width : The book's width (inches)
+- thick: The thickness of the book (inches)
+- cover: Whether the book is a hard cover of paperback.
+- And other variables...  
+
+I will include some data cleaning to get you started, although you don't have to use this exact code. We do want to remove NA and average out what we can beforehand.
+For all tests in this lesson, let $\alpha=0.05$.    
+
+```{r warning = FALSE}
+## Here is the data cleaning I mentioned. Again, feel free to explore this via your own method.
+url = paste0("https://raw.githubusercontent.com/bzaharatos/",
+                    "-Statistical-Modeling-for-Data-Science-Applications/",
+                    "master/Modern%20Regression%20Analysis%20/Datasets/amazon.txt")
+amazon <- read.delim2(url)
+df = data.frame(aprice = amazon$Amazon.Price, lprice = as.numeric(amazon$List.Price),
+                pages = amazon$NumPages, width = amazon$Width, weight = amazon$Weight..oz,
+                height = amazon$Height, thick = amazon$Thick, cover = amazon$Hard..Paper)
+df$lprice[which(is.na(df$lprice))] = mean(df$lprice, na.rm = TRUE)
+df$weight[which(is.na(df$weight))] = mean(df$weight, na.rm = TRUE)
+df$pages[which(is.na(df$pages))] = mean(df$pages, na.rm = TRUE)
+df$height[which(is.na(df$height))] = mean(df$height, na.rm = TRUE)
+df$width[which(is.na(df$width))] = mean(df$width, na.rm = TRUE)
+df$thick[which(is.na(df$thick))] = mean(df$thick, na.rm = TRUE)
+
+head(df)
+```
+
+##### B.1. (a) The Model     
+
+We want to determine which predictors impact the Amazon list price. Begin by fitting the full model.  
+
+Fit a model named lmod.full to the data with aprice as the response and all other rows as predictors. Then calculate the AIC, BIC and adjusted $R^{2}$ for this model. Store these values in AIC. full, BIC. fulL and adj.R2. full respectively.  \hfill\textcolor{red}{Q1: 2/2}  
+**Answer:**  
+```{r}
+df_num <- as.data.frame(sapply(df, as.numeric))
+df_num$cover <- df$cover
+head(df_num)
+df <- df_num
+df <- na.omit(df)
+```
+
+
+```{r}
+lmod.full <- lm(aprice ~ . , data = df)
+AIC.full <- AIC(lmod.full)
+BIC.full <- BIC(lmod.full)
+adj.R2.full <- summary(lmod.full)$adj.r.squared
+AIC.full
+BIC.full
+adj.R2.full
+```
+
+
+##### B.1. (b) A Partial Model    
+
+Fit a partial model to the data, with aprice as the response and Lprice and pages as predictors. Calculate the AIC, BIC and adjusted $R^{2}$ for this partial model. Store their values in AIC. part, BIC. part and adj.R2. part respectively.  \hfill\textcolor{red}{Q2: 2/2}  
+**Answer:**  
+```{r}
+lmod.partial <- lm(aprice ~ lprice + pages , data = df)
+AIC.partial <- AIC(lmod.partial)
+BIC.partial <- BIC(lmod.partial)
+adj.R2.partial <- summary(lmod.partial)$adj.r.squared
+AIC.partial
+BIC.partial
+adj.R2.partial
+```
+
+##### B.1. (c) Model Selection  
+
+Which model is better, Lmod. full or Lmod. part according to $$\mathrm{AIC}, \mathrm{BIC}, and R_{a}^{2}$$ ? Note that the answer may or may not be different across the different criteria. Save your selections as selected.model. AIC, selected.model. BIC, and selected.model.adj.R2 .  
+\hfill\textcolor{red}{Q3: 1/2}  
+**Answer:**  
+```{r}
+selected.model.AIC <- AIC.partial
+selected.model.BIC <- BIC.partial
+selected.model.adj.R2 <- adj.R2.full
+```
+
+
+##### B.1. (d) Model Validation  
+
+Recall that a simpler model may perform statistically worse than a larger model. Test whether there is a statistically significant difference between lmod.part and Lmod. full. Based on the result of this test, what model should you use?  
+\hfill\textcolor{red}{Q4: 1/2}  
+**Answer:**  
+```{r}
+anova(lmod.partial, lmod.full)
+```
+
+I would choose the partial model because p-value greater than 0.05, is not statistically significant and indicates strong evidence for the null hypothesis.    
+
+
+
+### Problem B.2 
+
+divorce is a data frame with 77 observations on the following 7 variables.  
+1. year : the year from 1920-1996
+2. divorce : divorce per 1000 women aged 15 or more
+3. Unemployed unemployment rate
+4. femlab : percent female participation in labor force aged 16+
+5. marriage : marriages per 1000 unmarried women aged 16+
+6. birth : births per 1000 women aged 15-44
+7. military : military personnel per 1000 population
+Here's the data: (I'll also include all data links in Canvas)  
+
+```{r}
+url = paste0("https://raw.githubusercontent.com/bzaharatos/",
+                    "-Statistical-Modeling-for-Data-Science-Applications/",
+                    "master/Modern%20Regression%20Analysis%20/Datasets/divusa.txt")
+df_b <- read.delim2(url)
+```
+
+##### B.2 (a)   
+
+Using the divorce data, with divorce as the response and all other variables as predictors, select the "best" regression model, where "best" is defined using AIC. Save your final model as $$Lm_{divorce}$$.  
+\hfill\textcolor{red}{Q5: 2/2}  
+**Answer:**  
+```{r}
+df_num <- as.data.frame(sapply(df_b, as.numeric))
+head(df_num)
+df_b <- df_num
+df_b<- na.omit(df_b)
+```
+
+
+```{r}
+library(AICcmodavg)
+library(MASS)
+lm_full <- lm(divorce ~ . , data = df_b)
+stepAIC(lm_full, direction = "both")
+lm_divorce <- lm(divorce ~ year + femlab + marriage + birth + military, 
+    data = df_b)
+```
+
+
+##### B.2 (b)  
+
+Using your model from part (a), compute the variance inflation factors VIFs for each $\widehat{\beta}_{j}, j=1, \ldots, p$. Store them in the variable $v$. Also, compute the condition number for the design matrix, stored in $k$. Is there evidence that collinearity causes some predictors not to be significant? Explain your answer.    
+\hfill\textcolor{red}{Q6: 2/2}  
+**Answer:**  
+```{r}
+library(car)
+#summary(lm_divorce)
+v <- vif(lm_divorce)
+v
+k <- kappa(df_b[, c('divorce', 'year', 'femlab' ,'marriage' , 'birth' , 'military')])
+k
+```
+
+Yes, year and femlab VIF is exceeding 5 or 10 indicates high multicollinearity between this independent variable and the others.  
+
+
+##### B.2 (c)   
+Remove the predictor with the highest VIF. Does that reduce the multicollinearity?  
+\hfill\textcolor{red}{Q7: 2/2}  
+**Answer:**  
+```{r}
+lm_divorce_2 <- lm(divorce ~ year + marriage + birth + military, 
+    data = df_b)
+v <- vif(lm_divorce_2)
+v
+k <- kappa(df_b[, c('divorce', 'year' ,'marriage' , 'birth' , 'military')])
+k
+```
+
+Yes, it reduce the multicollinearity 

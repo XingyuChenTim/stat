@@ -1,0 +1,324 @@
+---
+title: "STAT2_HW1"
+author: |
+  | Xingyu Chen
+date: "`r format(Sys.time(), '%B %d, %Y')`"  
+output:
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc_depth: 2
+    df_print: kable
+    highlight: tango
+fontsize: 12pt
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align='center', message=FALSE, cache=TRUE)
+output <- opts_knit$get("rmarkdown.pandoc.to")
+if(!is.null(output)) {
+  if(output=="html") opts_chunk$set(out.width = '400px') else
+    opts_chunk$set(out.width='.6\\linewidth')
+}
+```
+
+\hfill\textcolor{red}{Total Score: 42/48}  
+
+# Homework #1
+
+See Canvas for HW #1 assignment due date. Complete all of the following problems. Ideally, the theoretical problems should be answered in a Markdown cell directly underneath the question. If you don't know LaTex/Markdown, you may submit separate handwritten solutions to the theoretical problems, but please see the class scanning policy. Please do not turn in messy work. Computational problems should be completed in this notebook (using the R kernel). Computational questions may require code, plots, analysis, interpretation, etc. Working in small groups is allowed, but it is important that you make an effort to master the material and hand in your own work.
+
+## A. Theoretical Problems
+
+### Problem A.1
+
+Suppose that $X_{1}, \ldots, X_{n} \stackrel{i i d}{\sim} N\left(\mu, \sigma^{2}\right)$, where $\sigma$ is known, and we are interested in an estimator for $\theta=\mu^{2} .$ (Note that we will use the following calculuations to make comparisons to the parametric boostrap method explored below).    
+
+(a) Find the maximum likelihood estimator (MLE) for ${\theta}$, denoted $\hat{\theta}$.   \hfill\textcolor{red}{Q1: 2/2}  
+**Answer:**  
+The pdf of normal distribution is: 
+$$N(x)=\frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(x-\mu)^{2}}{2 \sigma^{2}}}$$    
+
+The MLE for $\mu^2$ will be:  
+$$L(\mu^2 \mid \theta) = \prod_{i}^{n}\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^{2}}{2 \sigma^{2}}} = (\frac{1}{\sqrt{2\pi\sigma^2}})^n\prod_{i}^{n}e^{-\frac{(x-\mu)^{2}}{2 \sigma^{2}}} $$
+
+Take the log for both side:  
+$$\ln{L}(\mu^2 \mid \theta) = -\frac{n}{2}\ln{2\pi} -\frac{n}{2}\ln{\sigma^2} - \frac{\sum(x-\mu)^2}{2\sigma^2}$$  
+
+The take the derivative for both side:   
+$$\frac{\partial \ln{L}(\mu^2 \mid \theta)}{\partial \mu^2} = \frac{1}{\sigma^2}\sum_{i}^{n}(x_i-\mu)  \equiv 0$$  
+
+Thus,  
+$$\hat{\mu}_{M L E}=\frac{1}{n} \sum_{i}^{n} x_{i}$$  
+
+$$\hat{\theta} =\hat{\mu^{2}}= (\frac{1}{n} \sum_{i}^{n} x_{i})^2$$
+
+(b) Compute the bias of $\hat{\theta}$, denoted $\operatorname{Bias}(\hat{\theta})$. Recall that $\operatorname{Bias}(\hat{\theta})=E(\hat{\theta})-\theta$.  \hfill\textcolor{red}{Q2: 2/2}  
+**Answer:**  
+we have:  
+$$\bar{x} = \sum_{i}^{n} \frac{x_{i}}{n}$$   
+
+
+$$\operatorname{Bias}(\hat{\theta})=E(\hat{\theta})-\theta = E(\bar{x}^2) - \mu^2 = Var[\bar{x}]+E[\bar{x}]^2 - \mu^2$$  
+$$ = \frac{\sigma^2}{n} + \mu^2 - \mu^2 = \frac{\sigma^2}{n}$$  
+Thus,  
+$$\operatorname{Bias}(\hat{\theta}) = \frac{\sigma^2}{n}$$
+
+(c) Compute the variance of $\hat{\theta}$, denoted $\operatorname{Var}(\hat{\theta})$ (HINT: You might use a moment generating function at some point in your answer.)   \hfill\textcolor{red}{Q3: 2/2}  
+**Answer:**  
+$$\operatorname{Var}(\hat{\theta}) = \operatorname{Var}(\mu^2) = \operatorname{Var}(\bar{x}^2)$$  
+The MGF of $\bar{x}$ is $e^{\mu{t}+ \frac{t^2\sigma^2}{2n}}$.  
+Thus, 
+$$m'(t) = (\mu + \frac{t\sigma^2}{n}) *e^{\mu{t}+ \frac{t^2\sigma^2}{2n}}$$
+$$m''(t) =(\mu + \frac{t\sigma^2}{n})^2 *e^{\mu{t}+ \frac{t^2\sigma^2}{2n}} + \frac{\sigma^2}{n}*e^{\mu{t}+ \frac{t^2\sigma^2}{2n}}$$  
+$$m'''(t) = (\mu + \frac{t\sigma^2}{n})^3 *e^{\mu{t}+ \frac{t^2\sigma^2}{2n}} + \frac{3\sigma^2(\mu + \frac{t\sigma^2}{n})}{n}*e^{\mu{t}+ \frac{t^2\sigma^2}{2n}}$$
+$$m''''(t) = (\mu + \frac{t\sigma^2}{n})^4 *e^{\mu{t}+ \frac{t^2\sigma^2}{2n}} + \frac{6\sigma^2(\mu + \frac{t\sigma^2}{n})^2}{n}*e^{\mu{t}+ \frac{t^2\sigma^2}{2n}} + \frac{3\sigma^4}{n^2}*e^{\mu{t}+ \frac{t^2\sigma^2}{2n}}$$  
+
+$$\operatorname{Var}(\hat{\theta}) = m''''(0) - [m''(0)]^2 =  \mu^4+\frac{6\sigma^2\mu^2}{n}+\frac{3\sigma^4}{n^2} - (\mu^2+\frac{\sigma^2}{n})^2 = \frac{4\sigma^2\mu^2}{n} + \frac{2\sigma^4}{n^2}$$  
+
+(d) Write down the boostrap estimators of $\operatorname{Bias}(\hat{\theta})$ and $\operatorname{Var}(\hat{\theta})$.  \hfill\textcolor{red}{Q4: 1/2}  
+**Answer:**  
+From (b), (c) and we know that $$\hat{x} = \frac{1}{n} \sum_{i}^{n} x_{i} $$   
+and$\sigma^{2}=\frac{\sum\left(x_{i}-\bar{x}\right)^{2}}{n-1}$
+Thus, the boostrap estimators will be: $$\operatorname{Bias}(\hat{\theta})_{boot}=\sigma^2/n=\frac{\sum\left(x_{i}-\bar{x}\right)^{2}}{n(n-1)}$$.  
+
+$$\operatorname{Var}(\hat{\theta})_{boot} = \frac{4\sigma^2\mu^2}{n} + \frac{2\sigma^4}{n^2}$$  
+
+### Problem A.2
+Provide a brief explanation of the pros and cons of using the bootstrap for calculating confidence intervals. \hfill\textcolor{red}{Q5: 2/2}    
+**Answer:**  
+Pros: It is a straightforward way to derive estimates of confidence intervals for complex estimators of the distribution. It is also an appropriate way to control and check the stability of the results. It is asymptotically more accurate than the standard intervals obtained using sample variance and assumptions of normality.   
+
+Cons: Bootstrapping depends heavily on the estimator used and, though simple, ignorant use of bootstrapping will not always yield asymptotically valid results and can lead to inconsistency. The result may depend on the representative sample.  
+
+\newpage
+
+## B. Computational Problems  
+### Problem B.1
+
+Suppose that $X_{1}, \ldots, X_{8} \stackrel{i i d}{\sim} \Gamma(\alpha, \beta) .$ Let's use the bootstrap to compute a $90 \%$ confidence interval for the population standard deviation: $s d(X)=\sqrt{\alpha / \beta^{2}}=\theta$.  
+
+Note:  
+
+The convention in this course will be to interpret $\Gamma(\alpha, \beta)$ as the "shape/rate" parameterization: shape $=\alpha$, rate $=\beta$. But $\mathrm{R}$ uses the "shape/scale" parameterization: shape $=\alpha$, scale $=\theta=1 / \beta$.  
+
+To be sure that you are properly simulating from the right gamma distribution, see the help file for rgamma() (run: ? rgamma). Also, see here for more information on the gamma distribution.  
+
+(a) State why a $\chi^{2}$ confidence interval is not valid in this context.
+You should reply on knowledge from your prereq class!  \hfill\textcolor{red}{Q6: 1/2}  
+**Answer:**  
+$\chi^{2}$ confidence interval is used when the data are normal, not for gamma.  
+
+
+(b) Generate a sample of size $n=8$ from $\Gamma(\alpha=3, \beta=4)$ and calculate the true population standard deviation (in this example, we are generating data so that we can see how well our estimation procedure will do). \hfill\textcolor{red}{Q7: 2/2}   
+**Answer:**  
+```{r}
+shape = 3
+scale = 1/4 
+n = 8 
+z_90 = 1.645
+std = sqrt(shape*scale^2)
+print(std)
+```
+
+(c) Generate $B=200$ bootstrap samples from the above sample. Print the dimension, and articulate what each row/column represents. Avoid loops! (HINT: use the replicate() function.)  \hfill\textcolor{red}{Q8: 2/2}  
+**Answer:**  
+```{r}
+library(boot)
+dat <- rgamma(n=n, shape = shape, scale = scale)
+N <- 200
+set.seed(1234)
+result = replicate(N, sample(dat, replace = T), simplify = 'matrix')
+df <- data.frame(t(result))
+print(dim(df))
+```
+Each row represent one round, each column represent one sample random choose from the data with replacement.  
+
+(d) Calculate and print the sample standard deviation, $s$. Then, calculate $s$ for each bootstrap sample. Denote this as $s_{i}^{*}$, for $i=1, \ldots, B$. Avoid loops! (HINT: use the apply() function.) Display a histogram of the distribution of $s_{i}^{*}, i=1, \ldots B$  \hfill\textcolor{red}{Q9: 2/2}  
+**Answer:**  
+```{r}
+sd(dat)
+df_1 <- apply(df, 1, sd)
+hist(df_1)
+```
+
+
+(e) Use the quantile 0 function to find the 5 th and 95 th percentile of the distribution of $s_{i}^{*}$. Use these values to calculate the $90 \%$ boostrap pivot confidence interval and bootstrap percentile confidence interval for $\theta$.  \hfill\textcolor{red}{Q10: 1/2}  
+**Answer:**  
+```{r}
+x_5 = quantile(df_1, 0.05)
+x_95 = quantile(df_1, 0.95)
+cat("(",x_5,",",x_95,")")
+```
+
+
+(f) Interpret this confidence interval.  \hfill\textcolor{red}{Q11: 2/2}  
+**Answer:**  
+The interval that I can be 90% certain contains the population standard deviation.  
+
+
+### Problem B.2
+Thus far, we've been looking at the nonparametric bootstrap. In this problem, we look at the parametric bootstrap as a way of estimating the bias and variance of an estimator $\hat{\theta}=\bar{X}^{2}$ of $\theta=\mu^{2}$ (in problem A.1 you calculated these values exactly).  
+
+(a) Generate $X_{1}, \ldots, X_{20} \stackrel{i i d}{\sim} N\left(\mu=2, \sigma^{2}=1\right)$, and then forget that you know $\mu$ and $\sigma^{2}$. Find the sample mean and sample variance.  \hfill\textcolor{red}{Q12: 2/2}  
+**Answer:**  
+```{r}
+dat_b2 <- rnorm(20, mean = 2, sd =1)
+mean(dat_b2)
+sd(dat_b2)
+```
+
+
+(b) Define $\widehat{N}$ to be the distribution of the variable $X_{i}$ in the population with the sample estimates plugged in for the unknown population parameters. Write down $\widehat{N}$ based on the data generated in (a).  \hfill\textcolor{red}{Q13: 2/2}  
+**Answer:**  
+ $\widehat{N} = N\left(\mu=1.980578, \sigma^{2}=0.9583407\right)$
+
+(c) Draw $B=500$ parametric bootstrap samples from $\widehat{N}$, and for each bootstrap sample $\left(X_{1, j}, \ldots, X_{20, j}\right)$, compute
+$$
+\hat{\theta}_{j}^{*}=\left(\frac{1}{20} \sum_{i=1}^{20} X_{i, j}^{*}\right)^{2}
+$$
+where $j=1, \ldots, B$  \hfill\textcolor{red}{Q14: 2/2}  
+**Answer:**  
+```{r}
+mu_b2 <- 1.980578
+var_b2 <- 0.9583407
+myData <- rnorm(20,mu_b2,var_b2)
+set.seed(200) # Setting the seed for replication purposes
+sample.size <- 20 # Sample size
+n.samples <- 500 # Number of bootstrap samples
+bootstrap.results <- c() # Creating an empty vector to hold the results
+for (i in 1:n.samples)
+{
+    obs <- sample(1:sample.size, replace=TRUE)
+    bootstrap.results[i] <- mean(myData[obs]) * mean(myData[obs]) # Mean of the bootstrap sample
+}
+head(bootstrap.results)
+```
+
+
+(d) Compute an estimate of the bias:
+$$
+\widehat{B}(\hat{\theta}) \approx \frac{1}{B} \sum_{j=1}^{B} \hat{\theta}_{j}^{*}-\bar{x}^{2}
+$$
+Compare this to the exact bias using the formula in problem A.1.  \hfill\textcolor{red}{Q15: 2/2}  
+**Answer:**  
+```{r}
+print(mean(bootstrap.results) - mu_b2^2)
+print(var_b2^2 / 20)
+```
+
+
+(e) Compute an estimate of the variance:
+$$
+\widehat{\operatorname{Var}}(\hat{\theta}) \approx \frac{1}{B-1} \sum_{j=1}^{B}\left(\hat{\theta}_{j}^{*}-\bar{\theta}\right)^{2},
+$$
+where
+$$
+\bar{\theta}=\frac{1}{B} \sum_{j=1}^{B} \hat{\theta}_{j}^{*}
+$$
+Compare this to the exact variance using the formula in problem A.1.  \hfill\textcolor{red}{Q16: 2/2}  
+**Answer:**  
+```{r}
+print(sum((bootstrap.results - mean(bootstrap.results)) * (bootstrap.results - mean(bootstrap.results)))/499)
+print((4*(mu_b2^2)*(var_b2^2)/500) + 2*(var_b2^4)/(500^2))
+```
+
+
+(f) True or False: For a fixed sample size $n=20$, as $B$ increases, $\widehat{\operatorname{Bias}}(\hat{\theta})$ will approach $\operatorname{Bias}(\hat{\theta}) .$ That is, for a fixed $n$, the bootstrap estimate of the bias will approach the true bias as the number of bootstrap samples, $B$ increases. You might consider running a simulation to decide!   \hfill\textcolor{red}{Q17: 2/2}  
+**Answer:**  
+False.  
+```{r}
+mu_b2 <- 1.980578
+var_b2 <- 0.9583407
+myData <- rnorm(20,mu_b2,var_b2)
+set.seed(200) # Setting the seed for replication purposes
+sample.size <- 20 # Sample size
+n.samples <- 50000 # Number of bootstrap samples
+bootstrap.results <- c() # Creating an empty vector to hold the results
+for (i in 1:n.samples)
+{
+    obs <- sample(1:sample.size, replace=TRUE)
+    bootstrap.results[i] <- mean(myData[obs]) * mean(myData[obs]) # Mean of the bootstrap sample
+}
+print(mean(bootstrap.results) - mu_b2^2)
+print(var_b2^2 / 20)
+print(sum((bootstrap.results - mean(bootstrap.results)) * (bootstrap.results - mean(bootstrap.results)))/499)
+print((4*(mu_b2^2)*(var_b2^2)/500) + 2*(var_b2^4)/(500^2))
+```
+
+
+### Problem B.3
+
+The "Wisconsin Card Sorting Test" is widely used by psychiatrists, neurologists, and neurophycologists with patients who have a brain injury. Patients with any sort of frontal lobe lesion generally do poorly on the test. The data frame WCST contains the test scores from a group of 50 patients from the Virgen del Camino Hospital.  
+
+(a) Using the code below, load the WCST data and explore whether there is reason to believe that the score data comes from a non-normal distribution. First, create a histogram (use ggplot!) and describe whether the data look normal. Then, use the function shapiro.test() to explore normality. Be sure to explain what this function does--i.e., what's the null and alternative hypothesis--in your answer.    \hfill\textcolor{red}{Q18: 2/2}  
+**Answer:**  
+```{r}
+library(PASWR2)
+library(ggplot2)
+df_b3 <- WCST
+ggplot(data = df_b3, aes(x = score)) + geom_histogram(fill = "lightblue", alpha = 0.8, 
+color ="blue")
+```
+The data is not look normal.  
+
+```{r}
+shapiro.test(df_b3$score)
+```
+Performs the Shapiro-Wilk test of normality.  
+
+(b) What assumptions must be made in order to compute a (non-boostrap) $95 \%$ confidence interval for the population mean score?  \hfill\textcolor{red}{Q19: 2/2}  
+**Answer:**  
+We have used simple random sampling, or if individuals have been assigned to treatments at random. Ideally our data should be drawn from a normally distributed population.  
+
+(c) Compute the confidence interval from (b).  \hfill\textcolor{red}{Q20: 1/2}  
+**Answer:**  
+```{r}
+library(Rmisc)
+CI(df_b3$score, ci=0.95)
+```
+
+
+(d) Compute a $95 \%$ bootstrap pivot confidence interval for the mean.  \hfill\textcolor{red}{Q21: 2/2}  
+**Answer:**  
+```{r}
+myData <- df_b3$score
+set.seed(1234) # Setting the seed for replication purposes
+sample.size <- 50 # Sample size
+n.samples <- 50 # Number of bootstrap samples
+bootstrap.results <- c() # Creating an empty vector to hold the results
+for (i in 1:n.samples)
+{
+    obs <- sample(1:sample.size, replace=TRUE)
+    bootstrap.results[i] <- mean(myData[obs]) # Mean of the bootstrap sample
+}
+CI(bootstrap.results, ci=0.95)
+```
+
+
+### Problem B.4  
+The dataset gives the number of births per month in New York city, from January 1946 to December 1959 . The data are ordered.    
+
+(a) Construct another column in the dataset that labels the month and year for each birth per month record.  \hfill\textcolor{red}{Q22: 2/2}  
+**Answer:**  
+```{r}
+library(TTR)
+# Loading Data
+births <- scan("http://robjhyndman.com/tsdldata/data/nybirths.dat")
+birthstimeseries <- ts(births, frequency=12, start=c(1946,1))
+birthstimeseries
+```
+
+
+(b) Construct a plot of births per month against the month/year column that you created in part (a). Analyze the plot. Do you notice anything interesting?  \hfill\textcolor{red}{Q23: 2/2}  
+**Answer:**  
+```{r}
+plot(birthstimeseries)
+```
+It follows similar pattern each year and most birth given on July.    
+
+(c) Suppose that your boss asked you to use the bootstrap to construct a confidence interval for the average number of births per month in New York city over the time period in the dataset. Write a short response to your boss describing why this confidence interval is not valid for this data.  \hfill\textcolor{red}{Q24: 2/2}  
+**Answer:**  
+Bootstrap is used for normal distribution and the births per month in New York city is not normal. If we use the bootstrap, then it result will be vary based on the sample estimator.  
