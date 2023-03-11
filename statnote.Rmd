@@ -1,0 +1,197 @@
+---
+title: "STAT2"
+output: pdf_document
+---
+# Module 1.1 Linear Regression 
+
+A **statistical** unit is one member of the set of entities being studied 
+
+A **population** is a collection of units about which research questions are asked
+
+A **sample** is a subset of the population. Typically, samples should be representative
+
+**Inferential statistics and data science** is the process of learning about relationships in a sample in a way that is reliable enough to generalize from the sample to a population of interest.
+
+To **operationalize a concept** means to derive a set of steps to measure the concept
+
+The **validity** of a dataset or measurement tool is the extent to which the dataset or measurement tool measures what it claims to measure
+
+**linear regression**: Is used to explain or model the relationship between a single variable Y, and one or more variables $X_1, …, X_p$
+
++ Y is called the response, outcome, output, or dependent variable
+
++ $X_1, … , X_p$ are called predictors, inputs, independent variables, explanatory variables, or features. In some contexts, they are also called covariates. 
+
+**Regression analysis** has two main objectives:
+
++ **Prediction**: predict an unmeasured/unseen Y using observed $X_1, ..., X_p$
+
++ **Explanation**: To assess the effect of, or explain the relationship between, Y and $X_1, ... , X_p$. 
+
+$\mathbf{Y}=\left(Y_{1}, \ldots, Y_{n}\right)^{T}$ be the response variable and $\mathbf{x}_{\mathbf{1}}=\left(\begin{array}{c}x_{1,1} \\ x_{2,1} \\ \vdots \\ x_{n, 1}\end{array}\right), \mathbf{x}_{\mathbf{2}}=\left(\begin{array}{c}x_{1,2} \\ x_{2,2} \\ \vdots \\ x_{n, 2}\end{array}\right), \ldots, \mathbf{x}_{\mathbf{p}}=\left(\begin{array}{c}x_{1, p} \\ x_{2, p} \\ \vdots \\ x_{n, p}\end{array}\right)$ be predictors; we will collect the predictors in a matrix: $X = (1 \space x_1 \space x_2 \space ... x_p)$, where 1 = (1,1,...,1)^T. Let $\boldsymbol{\beta}=\left(\beta_{0}, \beta_{1}, \ldots, \beta_{p}\right)^{T}$ be a vector of parameters. Finally, let $\boldsymbol{\varepsilon}=\left(\varepsilon_{1}, \ldots, \varepsilon_{n}\right)^{T}$ be a vector of error terms.    
+
+
+**Definition/Assumptions of the linear regression model:  **   
+1. **Linearity**  xian xing. X ~ Y scatter plot follows a Linear pattern.   
+2. **Independence**  du li xing. Y is independent of errors/residuals.   
+3. **Homoskedasticity (constant variance)**  fang cha qi xing. variance is the same for all X.     
+4. **Normality**  zheng tai xing. residuals approximately normally distributed, with a mean of zero.   
+
+**Interpreting simple linear regression parameters**:   
+1. ${\beta}_0$: the intercept of the true regression line.   ${\beta}_0$ is the average value of Y when x is zero. Usually this is called the “baseline average”.  
+2. ${\beta}_1$: the slope of the true regression line.  ${\beta}_1$: is the average change in Y associated with a 1-unit increase in the value of x.   
+
+**Interpreting multiple linear regression parameters**:   
+$y_i = {\beta}_0 + {\beta}_{1}x_{i1} + ... + {\beta}_{p-1}x_{i(p-1)} + {\varepsilon}$
+
+$\mathbf{y}=$
+$\left(\begin{array}{c}y_{1} \\ y_{2} \\ \vdots \\ y_{n}\end{array}\right)=\left(\begin{array}{ccccc}1 & x_{1,1} & x_{1,2} & \ldots & x_{1, p} \\ 1 & x_{2,1} & x_{2,2} & \ldots & x_{2, p} \\ \vdots & \vdots & \ddots & \vdots \\ 1 & x_{n, 1} & x_{n, 2} & \ldots & x_{n, p}\end{array}\right)\left(\begin{array}{c}\boldsymbol{\beta} \\ \beta_{0} \\ \beta_{1} \\ \vdots \\ \beta_{p}\end{array}\right)+\left(\begin{array}{c}\boldsymbol{\varepsilon} \\ \varepsilon_{0} \\ \varepsilon_{1} \\ \vdots \\ \varepsilon_{n}\end{array}\right)$
+
+$F = kx$: F = Force; k = Spring Constant; x = Displacement   
+
+A **circular analysis or double dipping** is the process of exploring a dataset in an attempt to discover what relationships exist, and then test hypotheses related to that exploration on the same dataset.   
+
+**Ways to avoid circular analyses**:  
+1. Design the analysis and prespecify research hypotheses before observing the data.  
+2. Subset the data   
+
+\newpage
+
+# Module 1.2 Least squares estimation
+$$y_i = {\beta}_0+{\beta}_1x_i+{\varepsilon}_i$$: y is measured response; B_0 and B_1, E_i are unknown, to be estimated; X_i is measured predictors  
+
+The **line of best fit** to the data is the line that minimizes the sum of the squared vertical distances between the line y and the observed points  
+
+$y = X{\beta} + {\varepsilon}$: The problem is to find a B so that XB is as close as possible to y.  
+
+The **surface of best** fit to the data is the surface that minimizes the sum of the squared vertical distances between the surface and the observed points:
+
+Let $X$ be an $m \times n$ matrix, $\mathbf{v}$ be $n \times 1$, and $\mathbf{y}$ be $m \times 1$. Then:  
+1. Lemma 1: Then $X^{T} X$ is symmetric, i.e., $\left(X^{T} X\right)^{T}=X^{T} X$.  
+2. Lemma 2: Let $\mathbf{y}=X \mathbf{v}$. Then $\frac{\partial y}{\partial \mathbf{v}}=X$ and $\frac{\partial y^{T}}{\partial \mathbf{v}}=X^{T}$  
+3. Lemma 3: Let $c=\mathbf{v}^{T}\left(X^{T} X\right) \mathbf{v}$. Then $\frac{\partial c}{\partial \mathbf{v}}=2 X^{T} X \mathbf{v}$  
+
+The **residuals** are defined as:  
+
+The **fitted values** are defined as:  
+
+The **hat matrix**, H, is defined as:  
+
+**Least Squares Estimation**: We define the best estimate of $\boldsymbol{\beta}=\left(\beta_{0}, \beta_{1}, \ldots, \beta_{p}\right)^{T}$ as the one that minimized the sum of the squared residuals:  
+
+In order to use least squares, we assume that:
+1. $E\left(\varepsilon_{i}\right)=0$ for all $i=1, \ldots, n$.  
+2. $E\left(Y_{i}\right)=\mathbf{x}_{\mathbf{i}}^{T} \boldsymbol{\beta}$ for all $i=1, \ldots, n$.  
+3. $\operatorname{Cov}\left(\varepsilon_{i}, \varepsilon_{j}\right)= \begin{cases}0 & i \neq j \\ \sigma^{2} & i=j\end{cases}$  
+4. $\left(X^{T} X\right)^{-1}$ exists.  
+
+The **Gauss-Markov Theorem**: Suppose that:   
+1.E $\left(\varepsilon_{i}\right)=0$ for all $i=1, \ldots, n$.  
+2. $E\left(Y_{i}\right)=\mathbf{x}_{\mathbf{i}}^{T} \boldsymbol{\beta}$ for all $i=1, \ldots, n$.  
+3. $\operatorname{Cov}\left(\varepsilon_{i}, \varepsilon_{j}\right)= \begin{cases}0 & i \neq j \\ \sigma^{2} & i=j\end{cases}$  
+4. $\left(X^{T} X\right)^{-1}$ exists.  
+Then $\widehat{\boldsymbol{\beta}}$ is the "best" unbiased estimator of $\boldsymbol{\beta}$.  
+
+The **maximum likelihood estimator**.  
+Suppose that $\varepsilon_{i} \stackrel{i i d}{\sim} N\left(0, \sigma^{2}\right)$. Then:  
+1. marginal pdf:  
+2. joint pdf:  
+3. log-likelihood:  
+
+**Sums of squares**:  
+1. RSS: Residual sum of squares:  
+2. ESS: Explained (or regression) sum of squares:  
+3. TSS: Total sum of squares:  
+
+The residual sum of squares **RSS** can be interpreted as a measure of how much variation in y is left unexplained by the model—that is, how much cannot be attributed to a linear relationship.  
+
+The parameter $\sigma^{2}$ determines the amount of spread about the true regression line.  
+
+An estimate of $\sigma^{2}$ will be used in statistical inference (e.g., confidence interval formulas and hypothesis testing), presented in the next two sections.  
+
+Note:  
+1. The divisor $n-(p+1)$ in is the number of degrees of freedom (df) associated with RSS and $\hat{\sigma}^{2}$.  
+2. The RSS has $n-(p+1)$ df because $p+1$ parameters must first be estimated to compute it, which results in a loss of $p+1 \mathrm{df}$.  
+3. Replacing each $y_{i}$ in the formula for $\widehat{\sigma}^{2}$ by the r.v. $Y_{i}$ gives a random variable.  
+4. It can be shown that the r.v. $\hat{\sigma}^{2}$ is an unbiased estimator for $\widehat{\sigma}^{2}$.  
+
+The coefficient of determination, $R^{2}$, is defined as:  
+$$
+R^{2}=1-\frac{R S S}{T S S}
+$$
+Note:
+- $0 \leq R^{2} \leq 1$  
+- Assuming that the model is correct, $R^{2}$ is interpreted as the proportion of observed variation in $y$ explained by the model.  
+
+Warnings about $R^{2}$  
+1. $R^{2}$ can be close to 1 but the model is the wrong fit for the data.  
+2. $R^{2}$ can be close to 0 even when the model is the correct fit for the data.  
+3. $R^{2}$ should not be used to compare models with a different number of predictors.  
+4. $R^{2}$ says nothing about the causal relationship between the predictors and the response.  
+
+The least squares estimate is the solution to the normal equations:  
+$$
+X^{T} X \boldsymbol{\beta}=X^{T} \mathbf{Y} .
+$$
+1. When $\left(X^{T} X\right)^{-1}$ exists, there is a unique solution, $\widehat{\boldsymbol{\beta}}$.  
+2. When $\left(X^{T} X\right)^{-1}$ does not exist, there will be infinitely many solutions.  
+
+Definition: When $\left(X^{T} X\right)^{-1}$ does not exist, the regression model is said to be non-identifiable (or, unidentifiable).  
+
+Why might we have non-identifiability?  
+1. One variable is just a multiple of another.  
+2. One variable is a linear combination of several others.  
+3. There are more variables than members in the sample.  
+Note: Near non-identifiability is trickier than exact non-identifiability.  
+
+OLS (Ord. least Squares):  
+For simple, $\varepsilon_i = y_i - E(y_i) = y_i - ({\beta}_0 + {\beta}_1x_i)$   
+$Q = \sum_{i=1}^{n}\varepsilon_i^2 = \sum_{i=1}^{n}[y_i - ({\beta}_0 + {\beta}_1x_i)]^2$  
+$\frac{\partial Q}{\partial \beta_0} = 2 \sum(y_i-\beta_0-\beta_1x_i)(-1) \equiv 0$
+
+
+### Problem B.3   
+ATTENTION!!!: THIS PROBLEM IS OPTIONAL. IF YOU DON'T DO IT, SIMPLY IGNORE IT IN YOUR SELF-GRADING TOTAL. IF YOU DO IT, YOU CAN CHOOSE WHETHER TO INCLUDE IT IN YOUR SELF-GRADING OR NOT.   
+
+Here's a procedure for calculating a two-sample bootstrap hypothesis test. You will apply this procedure on real data below.  
+
+Let $X_{1}, \ldots, X_{n_{1}}$ be an iid sample from population #1, with unknown mean $\mu_{1}$ and known standard deviation $\sigma_{1}$, and let $Y_{1}, \ldots, Y_{n_{2}}$ be an iid sample from population #2, with unknown mean $\mu_{2}$ and known standard deviation $\sigma_{2}$. Suppose we want to conduct a hypothesis test of the sort:
+$$
+H_{0}: \mu_{1}-\mu_{2}=0 \text { vs } H_{1}: \mu_{1}-\mu_{2} \geq 0
+$$
+The following algorithm has been suggested for a bootstrap test.   
+
+1. Calculate the test statistic  
+$$
+t=\frac{\bar{x}-\bar{y}}{\sqrt{\sigma_{1}^{2} / n_{1}+\sigma_{2}^{2} / n_{2}}}
+$$  
+**Answer:**  
+
+
+2. Let $\bar{z}$ be the mean of the combined data sets. Create two new data sets, $x_{1}^{\prime}, \ldots, x_{n_{1}}^{\prime}$ and $y_{1}^{\prime}, \ldots, y_{n_{2}}^{\prime}$ that are the original data sets centered at $\bar{z}$.  
+**Answer:**  
+
+
+3. Draw $B$ random bootstrap samples of size $n_{1}$ from $x_{1}^{\prime}, \ldots, x_{n_{1}}^{\prime}$ and of size $n_{2}$ from $y_{1}^{\prime}, \ldots, y_{n_{2}}^{\prime}$. The result will be two matrices, $x^{*}$ and $y^{*} ; x^{*}$ will containin columns of bootstrap samples from sample $\# 1$, and $y^{*}$ will contain columns of bootstrap samples from sample #2.   
+**Answer:**  
+
+
+4. Then, for each bootstrap sample pair, calculate
+$$
+t^{*}=\frac{\overline{x^{*}}_{j}-\bar{y}_{j}^{*}}{\sqrt{\sigma_{1}^{*^{2}} / n_{1}+\sigma_{2}^{*^{2}} / n_{2}}}
+$$
+where $\bar{x}_{j}^{*}$ is the sample mean of the $j^{t h}$ bootstrap sample from sample $\# 1$, and $\bar{y}_{j}^{*}$ is the sample mean of the $j^{\text {th }}$ bootstrap sample from sample #2. $\sigma_{1}^{*^{2}}$ and $\sigma_{2}^{*^{2}}$ are the corresponding variance estimates of the $j^{t h}$ bootstrap sample. $t^{*}$ will be a vector of length $B$ and will approximate the distribution of the test statistic $t$.   
+**Answer:**  
+
+
+5. Estimate the $p$-value using
+$$
+\frac{\# \text { of times }\left\{t^{*} \geq t\right\}}{B}
+$$
+
+Appling this procedure to real data...  
+
+A tennis club has two systems to measure the speed of a tennis ball. The local tennis pros suspect one system, speed1, is consistently recording faster speeds. To test her suspicions, she sets up both systems and records the speed of 12 serves (three serves from each side of the court). The values are stored in the data frame tennis, with variables speed1 and speed2. The recorded speeds are in kilometers per hour.   
+
+Does the evidence support the tennis pro's suspicion? Use the above bootstrap hypothesis testing procedure and $\alpha=0.1 .$   
+**Answer:**  
