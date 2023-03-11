@@ -1,0 +1,262 @@
+---
+title: "STAT2_HW4"
+author: |
+  | Xingyu Chen
+date: "`r format(Sys.time(), '%B %d, %Y')`"  
+output:
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc_depth: 2
+    df_print: kable
+    highlight: tango
+fontsize: 12pt
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align='center', message=FALSE, cache=TRUE)
+output <- opts_knit$get("rmarkdown.pandoc.to")
+if(!is.null(output)) {
+  if(output=="html") opts_chunk$set(out.width = '400px') else
+    opts_chunk$set(out.width='.6\\linewidth')
+}
+```
+
+\hfill\textcolor{red}{Total Score: 21/24} 
+
+# Homework #4  
+
+See Canvas for HW #4 assignment due date.  
+
+## A. Theoretical Problems
+
+### Problem A.1: 
+
+
+Let $Y_{1}, \ldots, Y_{n} \stackrel{i}{\sim} \operatorname{Poisson}\left(\lambda_{i}\right)$. Show that, if $\eta_{i}=\beta_{0}$, then the maximum likelihood estimator of $\lambda_{i}$ is $\widehat{\lambda}_{i}=\bar{Y}$, for all $i=1, \ldots, n$.  
+\hfill\textcolor{red}{Q1: 2/2}  
+**Answer:**  
+
+likelihood function $=L(Y ; \lambda)$
+$$
+=\prod_{i=1}^{n} f\left(Y_{i}, \lambda\right)=\prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_{i}}}{x_{i} !}=\frac{e^{-n \lambda} \lambda^{\sum_{i=1}^{n} Y_{i}}}{Y_{1}! Y_2!... Y_{n} !}
+$$
+then log of Likelihood function is
+$$L L F=\ln (L)=-n \lambda+\sum_{i=1}^{n} Y_{i} \log (\lambda) -\sum_{i=1}^{n} \log \left(Y_{i} !\right)$$  
+$$\frac{\partial}{\partial \lambda}(L L F)= -n + \frac{\sum_{i=1}^{n} Y_{i}}{ \lambda} = 0$$  
+$\Rightarrow \hat{\lambda}= \frac{1}{n} \sum_{i=1}^{n} Y_{i}=\bar{Y}$ = sample mean.  
+where sample is $S=\left\{Y_{1}, Y_{2}, \ldots, Y_{n}\right\}$.
+
+
+## B. Computational Problems
+
+### Problem B.1  
+The National Institute of Diabetes and Digestive and Kidney Diseases conducted a study of 768 adult female Pima Indians living near Phoenix, AZ. The purpose of the study was the investigate factors related to diabetes.  
+
+(a) Perform simple graphical and numerical summaries of the data. Can you find any obvious irregularities in the data? If so, take appropriate steps to correct these problems.
+
+```{r}
+# Find the data here..
+pima = read.table("https://www.colorado.edu/amath/sites/default/files/attached-files/pima.txt", sep = "\t", header = TRUE)
+#Here's a description of the data: https://rdrr.io/cran/faraway/man/pima.html  
+```
+\hfill\textcolor{red}{Q2: 2/2}  
+**Answer:**  
+```{r warning = FALSE}
+library(MASS) #Modern Applied Statistics with S
+library(tidyverse)
+library(reshape2)
+library(caret)
+summary(pima)
+pima_melt <- melt(pima)
+ggplot(pima_melt, aes(x=value)) + geom_histogram(bins=50) + facet_wrap(~variable, scale="free")
+apply(pima, 2, BoxCoxTrans)
+pima2 <- pima[,!names(pima) %in% c("diabetes", "age")]
+pima2 <- cbind(pima2, l_diabetes = log(pima$diabetes), inv_age = 1/(pima$age))
+melt_pima2 <- melt(pima2)
+ggplot(melt_pima2, aes(x=value)) + geom_histogram(bins=50) + facet_wrap(~variable, scale="free")
+```
+
+there is a moderately positive high correlation between age and pregnant. There are no missing values in the dataset and hence we can proceed further. Some of the data is skewed to the right i.e. pregnant, diabetes, age. Diabetes transformation appears much more normal. The BoxCox function confirms that the log transformation of diabetes is the correct one. I will perform one more transformation as recommended above, the inverse of ‘age’.
+
+(b) Fit a model with the result of the diabetes test as the response and all the other variables as predictors. Store this model as glmod_pima. Can you tell whether this model fits the data?  
+\hfill\textcolor{red}{Q3: 2/2}  
+**Answer:**  
+```{r}
+glmod_pima <- step(glm(test ~ ., family="binomial", data=pima2), direction="backward")
+summary(glmod_pima)
+```
+
+
+(c) Using the model above, write R code to calculate the difference in the odds of testing positive for diabetes for a woman with a BMI at the first quartile compared with a woman at the third quartile, assuming all other factors are held constant. Store your answer in a variable $X$.  
+Also, give a confidence interval for this difference, stored in a variable ci .   
+\hfill\textcolor{red}{Q4: 2/2}  
+**Answer:**  
+
+```{r}
+quantile(pima2$bmi)
+first_quant <- subset(pima2, pima2$bmi <= 27.3)
+third_quant <- subset(pima2, pima2$bmi >= 32.0 & pima2$bmi <= 36.6)
+first_quant_odds <- sum(first_quant$test == 1)/(length(first_quant$test))
+third_quant_odds <- sum(third_quant$test == 1)/(length(third_quant$test))
+print(paste0("Odds of Testing Positive for 1st Quartile: ", first_quant_odds))
+print(paste0("Odds of Testing Positive for 3rd Quartile: ", third_quant_odds))
+X <- third_quant_odds - first_quant_odds
+X
+
+beta_bmi <- coefficients(glmod_pima)['bmi']
+bmi_1st_quartile = 27.3
+bmi_3rd_quartile = 36.6
+eta_1st_quartile = bmi_1st_quartile * beta_bmi
+eta_3rd_quartile = bmi_3rd_quartile * beta_bmi
+diff_log_odds = eta_1st_quartile - eta_3rd_quartile
+# log odds-ratio value
+exp(diff_log_odds)
+# calculate 95% confidence interval for bmi parameter
+conf_int_bmi = confint(glmod_pima,'bmi')
+# 95% confidence interval for log-odds ratio
+odds_ratio = (exp(conf_int_bmi * (bmi_1st_quartile - bmi_3rd_quartile)))
+# chance
+ci <- odds_ratio/(1+odds_ratio)
+ci
+```
+
+
+(d) Do women who test positive have higher diastolic blood pressures? Is the diastolic blood pressure significant in the regression model? Explain the distinction between the two questions and discuss why the answers are only apparently contradictory.  
+\hfill\textcolor{red}{Q5: 2/2}  
+**Answer:**  
+```{r}
+pos_dm <- subset(pima, pima$test == 1)
+neg_dm <- subset(pima, pima$test == 0)
+
+par(mfrow=c(1,2))
+boxplot(pos_dm$diastolic, main="Positive for DM")
+boxplot(neg_dm$diastolic, main="Negative for DM")
+
+pos_sum <- summary(pos_dm)
+print("Positive for DM, statistics for diastolic blood pressures: ")
+pos_sum[,3]
+
+neg_sum <- summary(neg_dm)
+print("Negative for DM, statistics for diastolic blood pressures: ")
+neg_sum[,3]
+```
+Yes, women who test positive have higher diastolic blood pressure: median 74 vs median 70, p<0.001, but that doesn’t imply that it would be signfiicant in regression model. The data suggests they are quite similar. In the regression model, diastolic is statistically significant. These are two different meanings. Diastoic in regression means if there’s significant in the way it impacts the target variable, whereas the previous question only talks about the descriptive statistics
+
+
+(e) Ethical Issues in Data Collection   
+Read Maya Iskandarani's piece (https://researchblog.duke.edu/2016/10/24/diabetes-and-privacy-meet-big-data/)on consent and privacy concerns raised by this dataset. Summarize those concerns here.
+\hfill\textcolor{red}{Q6: 2/2}  
+**Answer:**  
+No researcher can realistically inform a study participant of what their medical data will be used for 40 years in the future. Generations’ worth of data on the Pima tribe have been publicly accessible for over two decades. The accessibility of information as personal as blood pressure, body mass index (BMI) and number of pregnancies of Pima Native Americans, which raise privacy issue.  
+
+
+### Problem B.2  
+
+The ships dataset (in the MASS package) gives the number of damage incidents and aggregate months of service for different types of ships broken down by year of construction and period of operation.  
+
+(a) The code below splits the data into a training set (80\% of the data) and a test set (the remaining $20 \%$ ). Use the training set to develop an appropriate regression model for the rate of incidents, using type, period, and year as predictors (HINT: is this a count model or a rate model?). Store this model in glmod_ships.  
+\hfill\textcolor{red}{Q7: 2/2}  
+**Answer:**  
+```{r}
+library(MASS)
+data(ships)
+ships = ships[ships$service != 0,]
+ships$year = as.factor(ships$year)
+ships$period = as.factor(ships$period)
+dim(ships)
+set.seed(11)
+n = floor(0.8 * nrow(ships))
+index = sample(seq_len(nrow(ships)), size = n)
+train = ships[index, ]
+test = ships[-index, ]
+head(train)
+dim(train)
+summary(train)
+
+#Poisson distributions arive naturally when the time between events is indepedent and identially exponentially distributed. We count the number of events in a given time period.
+glmod_ships <- glm(incidents ~ ., family=poisson, data=train)
+summary(glmod_ships)
+```
+
+
+(b) Use the model that you stored in glmod_ships to calculate the mean squared prediction error (MSPE) for the test set. Store the predicted MSPE in mse_glmod_ships .
+
+Recall from earlier assignments that the MSE can give us a sense of how well the model does at predicting new observations. The predicted mean squared error (MSE) is defined as
+$$
+M S E=\frac{1}{n} \sum_{i=1}^{n}\left(y_{i}-\hat{y}_{i}\right)^{2}
+$$
+where $y_{i}$ is the response in the test set, and $\hat{y}_{i}$ is the predicted response from glmod_ships, given the predictor values in the test set.
+Note that the predict.glm() function can be helpful here. Just be sure to specify the type argument (HINT: do you want $\hat{y}_{i}$ to be on the scale of the linear predictor $\eta$, or the mean of the response?)  
+\hfill\textcolor{red}{Q8: 2/2}  
+**Answer:**  
+```{r}
+mse_glmod_ships <- 
+  mean((test$incidents - predict.glm(glmod_ships, test, type = "response"))^2)
+mse_glmod_ships
+```
+
+
+
+(c) Now construct a new regression model leaving out the year predictor. Store this model as glmod_ships2 . Calculate the predicted MSPE (Mean Squared Prediction Error) for the test set using glmod_ships2 . Decide which model is better glmod_ships or glmod_ships2 - and store your answer in glmod_ships3.  
+\hfill\textcolor{red}{Q9: 2/2}  
+**Answer:**  
+
+```{r}
+glmod_ships2 <- glm(incidents ~ type + period + service, family=poisson, data=train)
+summary(glmod_ships2)
+mse_glmod_ships2 <- mean((test$incidents - predict.glm(glmod_ships2, test, type = "response"))^2)
+mse_glmod_ships2
+glmod_ships3 <- glmod_ships
+```
+
+
+
+(d) Let $\alpha=0.05 .$ Conduct two $\chi^{2}$ tests (using the deviance):  
+
+1. Test the adequacy of null model (store the p-value for this test in chisq_null); and    
+2. Test the adequacy of the glmod_ships model agaisnt the saturated model (store the p-value for this test in chisq_p).    
+What conclusions should you draw from these tests?  
+\hfill\textcolor{red}{Q10: 1/2}  
+**Answer:**  
+```{r}
+nullmod <- glm(incidents ~ 1, family = poisson, data = train)
+nullmod
+chisq_null <- pchisq(554.7,26,lower.tail=FALSE)
+#chisq_null <- with(anova(nullmod,glmod_ships),pchisq(Deviance,Df,lower.tail=FALSE)[2]) 
+chisq_null
+fullmod <- glm(incidents ~ ., family = poisson, data = ships)
+fullmod
+chisq_p <- pchisq(614.5,33,lower.tail=FALSE)
+chisq_p 
+```
+The low p-value means we can reject the null hypohesis test and we do not need to use the saturated model.  
+
+(e) Plot the deviance residuals against the linear predictor $\eta$. Interpret this plot. Hint: The residuals function has a type parameter and "deviance" is one possible type.  
+\hfill\textcolor{red}{Q11: 1/2}  
+**Answer:**  
+```{r}
+plot(glmod_ships$linear.predictors, resid(glmod_ships, type='deviance'))
+abline(h = 0, lty = 2)
+```
+polyps do not occur independently of one another, but instead may ‘cluster’ together. It may indicate inappropriate link function.  
+
+
+(f) For some GLMs (including the type in this question!), overdispersion is sometimes a problem. Overdispersion occurs when the observed (data) variance is higher than expected, if the model is correct. Explore the two models above for evidence of overdispersion.
+\hfill\textcolor{red}{Q12: 1/2}  
+**Answer:**  
+```{r}
+library(AER)
+#this package has a function overdispersiontest(), which conducts an overdisperion test.
+#If you use it, please clearly describe the test being used, including hypotheses, test statistic distribution,
+#and conclusions
+dispersiontest(glmod_ships)
+dispersiontest(fullmod)
+```
+
+
+
+
+

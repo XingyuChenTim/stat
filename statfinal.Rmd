@@ -1,0 +1,32 @@
+---
+title: "statmidterm"
+author: |
+  | Xingyu Chen
+date: "`r format(Sys.time(), '%B %d, %Y')`"  
+output:
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc_depth: 2
+    df_print: kable
+    highlight: tango
+fontsize: 12pt
+geometry: margin=1in
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align='center', message=FALSE, cache=TRUE)
+output <- opts_knit$get("rmarkdown.pandoc.to")
+if(!is.null(output)) {
+  if(output=="html") opts_chunk$set(out.width = '400px') else
+    opts_chunk$set(out.width='.6\\linewidth')
+}
+```
+
+categorical predictors: each category is a level/factor
+why linear? interpret ability
+more than two levels, f level factor create f-1 dummy variables
+Binary response: linear system: $n_i = \beta_0+...\beta_qX_{i,q}$, link function 
+
+d
